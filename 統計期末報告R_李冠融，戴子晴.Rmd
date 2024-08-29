@@ -1,0 +1,124 @@
+---
+title: "統計期末報告"
+組員: 李冠融B084012001 戴子晴B084012010
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+library(tidyverse)
+library(data.table)
+library(TeachingDemos)
+library(asbio)
+library(dummies)
+library(olsrr)
+library(car)
+library(questionr)
+library(dplyr)
+setwd("C://Users//Gladice//Desktop//R 下")
+```
+
+#模型建立
+```{r}
+data <- fread("C://Users//Gladice//Desktop//R 下//試做9.csv")
+data$gender <- ifelse(data$gender=="male",1,0)
+data$holiday <- ifelse(data$holiday=="yes",1,0)
+data$trend <- ifelse(data$trend=="yes",1,0)
+data$weather <- ifelse(data$weather=="yes",1,0)
+
+agetable <- data.frame(data$age)
+dummyage <-dummy.data.frame(agetable)
+colnames(dummyage) <- c("agea","ageb","agec")
+data <- cbind(data,dummyage)
+
+datalm <- lm(spend~gender+income+agea+ageb+holiday+trend+weather,data=data)
+summary(datalm)
+
+```
+
+#檢定
+```{r}
+summary(datalm)
+
+anova(datalm)
+
+car::vif(datalm)
+```
+
+#殘餘項分析
+```{r}
+res <- fortify(datalm)
+
+ggplot(res,aes(x=.fitted,y=.stdresid))+
+  geom_point()+
+  geom_smooth(method=lm)
+
+ols_plot_resid_stud_fit(datalm)
+```
+
+#增刪自變數
+```{r}
+data_1 <- lm(spend~income,data=data)
+summary(data_1)
+data_2 <- lm(spend~gender+income,data=data)
+summary(data_2)
+data_3 <- lm(spend~gender+income+agea+ageb,data=data)
+summary(data_3)
+data_4 <- lm(spend~gender+income+agea+ageb+holiday,data=data)
+summary(data_4)
+data_5 <- lm(spend~gender+income+agea+ageb+holiday+trend,data=data)
+summary(data_5)
+data_6 <- lm(spend~gender+income+agea+ageb+holiday+weather,data=data)
+summary(data_6)
+ols_step_both_p(datalm, details = TRUE)
+plot(ols_step_both_p(datalm))
+ols_step_both_p(datalm)
+```
+
+#模型修正確認
+```{r}
+datalm_new <- lm(spend~gender+income+agea+ageb+holiday,data=data)
+summary(datalm_new)
+
+anova(datalm_new)
+
+res_new <- fortify(datalm_new)
+
+ggplot(res_new,aes(x=.fitted,y=.stdresid))+
+  geom_point()+
+  geom_smooth(method=lm)
+
+ols_plot_resid_stud_fit(datalm_new)
+```
+
+#自變數相關性(圖表)
+```{r}
+dataset <- fread("C://Users//Gladice//Desktop//R 下//試做8.csv")
+dataset$gender <- ifelse(dataset$gender=="male",1,0)
+dataset$holiday <- ifelse(dataset$holiday=="yes",1,0)
+dataset$trend <- ifelse(dataset$trend=="yes",1,0)
+dataset$weather <- ifelse(dataset$weather=="yes",1,0)
+
+#income-spend
+ggplot(data = dataset, aes(x = income, y = spend))+
+  geom_point()+
+  geom_smooth(method=lm)
+
+#age-income
+ggplot(data = dataset, aes(x = age, y = income))+
+  geom_point()+
+  geom_smooth(method=lm)
+
+#age-spend
+ggplot(data = dataset, aes(x = age, y = spend))+
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+
+
+
+
+
+
