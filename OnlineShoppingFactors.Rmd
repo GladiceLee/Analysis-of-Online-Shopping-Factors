@@ -1,6 +1,6 @@
 ---
-title: "統計期末報告"
-組員: 李冠融B084012001 戴子晴B084012010
+title: "Statistics Final Report"
+組員: Gladice Lee B084012001 Sunny Thai B084012010
 output: html_document
 ---
 
